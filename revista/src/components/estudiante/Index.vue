@@ -4,9 +4,9 @@
       li
         a Revistas disponibles
       li 
-        a Nueva Revistas
+        router-link(to="/designer")  Nueva Revistas
       li 
-        a Grupos de trabajo
+        router-link(to="/") Grupos de trabajo
 </template>
 
 <script>
