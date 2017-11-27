@@ -1,40 +1,127 @@
 <template lang="pug" >
-  div
-    div(class="box"
-      :id="id" 
-      draggable="true" 
-      @drag="dragging" 
-      @dragend="onDragEnd" 
-      @dragstart="ondrag" 
-      @click="clk"
-      @dblclick="dbclk"
-      @drop="ondrop") 
-        p(v-if="!editing") {{text}}
-        textarea(v-else @focusout="focusOut" class="txtBox" @load="load"  id="textArea" v-model="text") {{text}}
+  div(
+    class="box"
+    :id="id" 
+    draggable="true" 
+    @drag="dragging" 
+    @dragend="onDragEnd" 
+    @dragstart="ondrag" 
+    @click="clk"
+    @dblclick="dbclk"
+    @resize="resize"
+    @drop="ondrop")
+    picture-input(
+      v-if="isImage"
+      ref="pictureInput"
+      v-bind:width="widthNumber"
+      v-bind:height="heightNumber"
+      size="25"
+      accept="image/jpeg,image/png" 
+      buttonClass="btn"
+    )
+    p(v-if="!editing") {{text}}
+    textarea(v-else @focusout="focusOut" class="txtBox" @load="load"  id="textArea" v-model="text") {{text}}
+
 </template>
 
 <script>
+
+/*
+elementResizeEvent = require('../index.js');
+
+element = document.getElementById("resize");
+window.p = p = document.getElementById("width");
+console.log(p);
+console.log(elementResizeEvent);
+console.log(elementResizeEvent(element, function() {
+  console.log("resized!");
+  console.log(element.offsetWidth);
+  console.log(p);
+  console.log(element.offsetWidth + "px wide");
+  p.innerHTML = element.offsetWidth + "px wide";
+}));
+
+ */
 import TextBox from './TextBox'
+import PictureInput from 'vue-picture-input'
+import ResizeEvent from 'element-resize-event'
 export default {
+  name:'box',
+  computed:{
+    width() {
+      console.log(this.widthNumber)
+      //document.getElementById(this.id).style.width=this.widthNumber+'px'
+      window.resizeBy(100,100)
+      return parseInt(this.widthNumber)
+    },
+    height() {
+      return parseInt(this.heightNumber)
+    }
+  },
   components: {
-    TextBox
+    TextBox, PictureInput
   },
   props: {
     id: {
       required: true,
-      type: String
     },
+    editableText:{
+      type: Boolean,
+      default:true
+    },
+    isImage: {
+      default: false
+    },
+    initText: {
+      type: String,
+      default: '',
+    },
+    position: {
+      default: {
+        x:400,
+        y: 400,
+      },
+    },
+    dims: {
+      default: {
+        height: 100,
+        width: 100,
+      }
+    }
+  },
+  mounted(){
+    let b = document.getElementById(this.id)
+    ResizeEvent(b, function() {
+      console.log('evento resize', b.offsetWidth)
+      this.widthNumber= b.offsetWidth
+      this.heightNumber= b.offsetHeight
+    })
+    b.style.top = this.position.y + 'px'
+    b.style.left = this.position.x + 'px'
+    b.style.width = this.dims.width + 'px'
+    b.style.height = this.dims.height + 'px'
+
   },
   data: () => ({
     offset:{},
     text: undefined,
-    editing: false
+    editing: false,
+    widthNumber: 400,
+    heightNumber: 400,
+    margin:'50'
   }),
   beforeMount(){
+    this.text = this.initText
   },
   methods: {
+    setFocus(){
+      this.$emit('changeFocus', this.id)
+    },
     changeBox() {
       document.getElementById(ev.target.id)
+    },
+    resize(ev) {
+      console.log(ev.target, 'resize')
     },
     dragging(ev) {
 //      document.getElementById(ev.target.id).style.position="absolute"
@@ -50,20 +137,17 @@ export default {
     ondrag(ev) {
       this.offset.x = ev.offsetX
       this.offset.y = ev.offsetY
-      
     },
     onDragEnd(ev){
-      document.getElementById(ev.target.id).style.top=(-this.offset.y+ev.y)+'px'
-      document.getElementById(ev.target.id).style.left=(-this.offset.x+ev.x)+'px'
+      document.getElementById(ev.target.id).style.top=(-this.offset.y+ev.y) + 'px'
+      document.getElementById(ev.target.id).style.left=(-this.offset.x+ev.x) + 'px'
     },
     dragOver(ev) {
       
       //console.log(ev.target)
     },
     clk(ev) {
-      console.log(document.activeElement)
-      console.log(ev.offsetX, ev.offsetY)
-      
+      this.setFocus()
     },
     dbclk(ev) {
       let element = document.getElementById(ev.target.id)
@@ -85,7 +169,6 @@ export default {
 <style scoped >
 .box {
   border: 1px solid;
-  width: 100px;
   height: 100px;
   position: absolute;
   resize: both;

@@ -11,8 +11,10 @@
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "element-resize-event": "^2.0.9",
     "pug": "^2.0.0-rc.4",
     "vue": "^2.5.2",
+    "vue-picture-input": "^2.0.1",
     "vue-router": "^3.0.1",
     "vuex": "^3.0.1"
   },
